@@ -1,0 +1,290 @@
+Etude statistique :
+
+
+import mysql.connector
+
+def re(num_etu):
+    res=[]
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor(buffered=True)     
+    if int(num_etu) >= 6525 :
+        cursor.execute('select etudiant.nom,etudiant.prenom,cours.nomC,resultat.note,table2.Classe,table2.MAX,table2.MIN from etudiant,cours,resultat,table2,class where etudiant.num_etu=resultat.num_etu and cours.num_cours=resultat.num_cours and class.numclass=18 and cours.num_cours=table2.num_cours and etudiant.num_etu LIKE \'%' + num_etu + '%\';')
+        cursor.execute('insert into resultatfinal(NOM,Prenom,Module,Note,Classe,MAX,MIN) select etudiant.nom,etudiant.prenom,cours.nomC,resultat.note,table2.Classe,table2.MAX,table2.MIN from etudiant,cours,resultat,table2,class where etudiant.num_etu=resultat.num_etu and cours.num_cours=resultat.num_cours and class.numclass=18 and cours.num_cours=table2.num_cours and etudiant.num_etu LIKE \'%' + num_etu + '%\';')
+        cursor.execute('insert into moyenne(Nom,prenom,Note) select resultatfinal.NOM,resultatfinal.Prenom,sum(resultatfinal.note)/6 from resultatfinal;')
+        cursor.execute('select Note from moyenne;')
+        for row in cursor :
+            res.append(int(row[0]))
+            cursor.execute('delete from resultatfinal;')
+            cursor.execute('delete from moyenne;')
+            return(res[0])
+    #cnx.close()
+    if int(num_etu) < 6525:
+       cursor.execute('select etudiant.nom,etudiant.prenom,cours.nomC,resultat.note,table2.Classe,table2.MAX,table2.MIN from etudiant,cours,resultat,table2,class where etudiant.num_etu=resultat.num_etu and cours.num_cours=resultat.num_cours and class.numclass=8 and cours.num_cours=table2.num_cours and etudiant.num_etu LIKE \'%' + num_etu + '%\';')
+       cursor.execute('insert into resultatfinal(NOM,Prenom,Module,Note,Classe,MAX,MIN) select etudiant.nom,etudiant.prenom,cours.nomC,resultat.note,table1.Classe,table1.MAX,table1.MIN from etudiant,cours,resultat,table1,class where etudiant.num_etu=resultat.num_etu and cours.num_cours=resultat.num_cours and class.numclass=8 and cours.num_cours=table1.num_cours and etudiant.num_etu LIKE \'%' + num_etu + '%\';')
+       cursor.execute('insert into moyenne(Nom,prenom,Note) select resultatfinal.NOM,resultatfinal.Prenom,sum(resultatfinal.note)/6 from resultatfinal;')
+       cursor.execute('select Note from moyenne;')
+       for row in cursor :
+           res.append(int(row[0]))
+           cursor.execute('delete from resultatfinal;')   
+           cursor.execute('delete from moyenne;')
+           return(res[0])
+num_etu=6501
+L=[]
+R=[]
+l=[]
+r=[]
+T=[]
+for num_etu in range(6501,6525,1):
+    L.append(re(str(num_etu)))
+
+for j in L:
+    l.append(j)
+#print(l)
+
+for num_etu in range(6525,6549,1):
+    R.append(re(str(num_etu)))
+
+for i in R:
+    r.append(i)
+#print(r)
+T=l+r
+
+
+Q1 ::
+
+library(reticulate)
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/ex12.py')
+  
+R<-as.vector(T)
+typeof(R)
+
+'note>14'<-c(R[R>14])
+'note<10'<-c(R[R<10])
+'10<note<12'<-c(R[10<R & R<12])
+'12<note<14'<-c(R[12<R& R<14])
+length('note>14')
+x=length(`note<10`)
+y=length(`10<note<12`)
+z=length(`12<note<14`)
+k=length(`note>14`)
+valeurs=c(x,y,z,k)
+pie(valeurs,col=c("green","orange","red","yellow","white"),labels=c("note<10","10<note<12","12<note<14","note>14"),main=" Les notes des élèves  par catégorie de notes ",cex=1)
+legend(x="bottomleft", legend=c("note<10","10<note<12","12<note<14","note>14"), cex=1,fill=c("green","orange","red","yellow","white"))
+
+
+
+
+total = sum(valeurs)
+pourcentages = valeurs/total*100 ; cat("Les valeurs en % sont de :",pourcentages,"\n")
+# Fonction à coller dans R - cette fonction text_pie permet d'ajouter des étiquettes au centre des quartiers
+text_pie = function(vector,labels=c(),cex=1) {
+  vector = vector/sum(vector)*2*pi
+  temp = c()
+  j = 0
+  l = 0
+  for (i in 1:length(vector)) {
+    k = vector[i]/2        
+    j =  j+l+k
+    l = k
+    text(cos(j)/2,sin(j)/2,labels[i],cex=cex)
+  }
+  vector = temp
+}
+pourcentages
+text_pie(pourcentages,c("7,40%%","0,00%","62,96%","29,62%"),cex=0.6)
+
+
+Q2 ::::
+
+library(rAmCharts)
+library(reticulate)
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/ex12.py')
+library(rAmCharts)
+amHist(x =T,col = "#CECECE",xlab = "NOTE", ylab = "Nombre")
+
+
+
+Analyse des donnees:::
+
+code :::
+
+
+---
+title: "Dashboard de Getion Des Etudiants"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: flatly
+    runtime: shiny
+---
+<style>                     
+.navbar {
+  background-color:flatly;
+  border-color:black;
+}
+.navbar-brand {
+color:black!important;
+}
+
+
+</style> 
+
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(shiny)
+library(jsonlite)
+library(maptools)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(purrr)
+library(leaflet)
+library(plotly)
+library(rAmCharts)
+library(reticulate)
+```
+
+
+# Page 1 
+
+Column {data-width=400} 
+----------------------------------------------------------------------
+
+### 
+
+```{r}
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/sanstitre19.py')
+df1 <- data.frame(Module=a,Nbetudiant=b)
+amBarplot(x = "Module", y ="Nbetudiant", data =df1,depth = 15,labelRotation = -45,theme="dark")
+
+```
+
+### les nationalite
+
+```{r}
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/sanstitre20.py')
+data1<- data.frame(label=r,value=l)
+amPie(data=data1,legend = FALSE,depth = 10,inner_radius = 50,theme="dark")
+
+```
+
+row {data-width=300}
+-----------------------------------------------------------------------
+
+###
+
+```{r}
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/ex2.py')
+df2<-data.frame("class13/14"=l,"class14/15"=r)
+amBoxplot(df2,ylim=c(0,20),xlab="Classe",ylab = "moyenne_gene",theme="dark")
+
+```
+
+### Taux de reussie
+
+```{r}
+
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/sanstitre23.py')
+bands = data.frame(start = c(0, 40, 60), end = c(40, 60, 100),color = c("#00CC00", "#ffac29", "#ea3838"),stringsAsFactors = FALSE,text="%")
+bands2 = data.frame(start = c(0,10,20), end =c(30,40,49),color = c("#00CC00", "#ffac29", "#ea3838"),stringsAsFactors = FALSE)
+amAngularGauge(x=z,text='%', start = 0, end = 100, bands =bands,theme="dark")
+
+```
+
+Column row {data-width=300}
+-----------------------------------------------------------------------
+
+### Reussie
+
+```{r}
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/sanstitre23.py')
+valueBox(p,icon="fa-graduation-cap",color="green")
+
+```
+
+### inscrit
+
+```{r}
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/sanstitre23.py')
+valueBox(inc,icon="fa-bars",color="orange")
+
+```
+
+### Echec
+
+```{r}
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/sanstitre23.py')
+valueBox(e,icon="fa-frown-open",color="red")
+
+```
+
+### Abondonne
+
+```{r}
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/sanstitre23.py')
+a=inc-etu
+valueBox(a,icon="fa-box-open",color="teal")
+
+```
+
+# Page 2
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### 
+
+```{r}
+library(reticulate)
+library(leaflet)
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/sanstitre21.py')
+villes <- data.frame(Ville = c("Paris", "Lille", "Nantes", "Marseille"),Latitude = c(48.85661400000001, 50.62924999999999, 47.218371, 43.296482),Longitude = c(2.3522219000000177, 3.057256000000052, -1.553621000000021, 5.369779999999992),Population = c(2249975, 327560, 284970, 850726),nbetu=c(40,3,1,5))
+leaflet(villes) %>% 
+addTiles() %>%
+addCircles(lng = ~Longitude, lat = ~Latitude, weight = 1,radius = ~sqrt(Population) * 50, popup = ~paste(Ville, ":", nbetu,"etudiant"),color = "#a500a5",fillOpacity = 0.5)
+
+```
+
+row {data-width=300}
+-----------------------------------------------------------------------
+
+### 
+
+```{r}
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/ex2.py')
+s=c(1:48)
+d<-data.frame("Note"=T,"Num_Etu"=s)
+p <- ggplot(d, aes(x=Num_Etu, y=Note)) +
+            geom_point(shape=1) +    # Use hollow circles
+            geom_smooth(method=lm)   # Add linear regression line
+ggplotly(p)
+
+```
+
+### 
+
+```{r}
+library(reticulate)
+use_python("C:/Users/viet/.spyder")
+source_python('C:/Users/viet/.spyder/sanstitre26.py')
+library(rAmCharts)
+amHist(x =T,col = "#CECECE",xlab = "NOTE", ylab = "Nombre")
+
+```
+
+
