@@ -1,2 +1,2 @@
 # Projects
-my projects with code
+This is a repository where i have my projects  
