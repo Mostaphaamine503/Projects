@@ -1,0 +1,168 @@
+      
+      ### creation de la base de donnees et les tables
+
+create database students;
+use students;
+
+create table auteur ( nauteur int primary key,nomA varchar(50),prenomA varchar(50),natioA varchar(50));
+create table livre ( Nlivre int ,num_isbn varchar(100) ,titre varchar(100),nbpages varchar(100) ,anneeS int ,prix int ,primary key(Nlivre));
+create table possede( Nlivre int ,nauteur int, primary key(Nlivre),foreign key(nauteur) references auteur(nauteur));
+
+create table pret( Npret int primary key ,num_etu int,Nlivre int,datepret date ,dateretour date ,dateretourprevue date,foreign key (num_etu) references etudiant(num_etu));
+create table etudiant (num_etu int primary key ,nom varchar(50),prenom varchar(50),date_nai date ,ville varchar(100),dateinscripbu date ,dateAbs date,numclass int );
+create table class (numclass int,nomclass varchar(50),primary key(numclass));
+
+create table cours(num_cours int primary key ,nomC varchar(50),nb_heu int,num_en int );
+create table enseignant(num_ens int ,nomP varchar(50),prenomP varchar(50),specialite varchar(100),departement varchar(100),primary key(num_ens));
+create table resultat(num_etu int,num_cours int,note double,primary key(num_etu,num_cours),foreign key (num_cours) references cours(num_cours));
+
+create table charge(num_cours int,num_ens int ,nbH int,primary key(num_cours,num_ens));
+create table inscrit(num_Etudiant int primary key,num_cours int ,dateinsC date,foreign key (num_cours) references cours(num_cours));
+
+     
+      ### les modification sur la base de donnees
+
+alter table inscrit add column num_etu int;
+alter table inscrit add constraint fk_inscrit_num_etu foreign key(num_etu) references etudiant(num_etu);
+
+alter table etudiant modify nom varchar(100);
+ALTER TABLE etudiant ADD email VARCHAR(100);
+create table adresse (adresse varchar(100) primary key);
+
+alter table pret drop primary key;
+alter table pret drop foreign key pret_ibfk_1;
+ 
+alter table pret add constraint pk_pret primary key(Npret);
+alter table pret add constraint fk_pret foreign key (num_etu) references etudiant(num_etu);
+alter table pret add constraint fk1_pret foreign key(Nlivre) references livre(Nlivre);
+
+alter table livre add nauteur int;
+alter table livre
+add constraint FK_livre_nauteur
+foreign key(nauteur) references auteur(nauteur);
+
+alter table livre
+add constraint UK_livre_titre
+unique(titre);
+
+alter table livre add langue varchar(50);
+alter table livre add NbreExemplaires int;
+
+alter table livre 
+add constraint UK_livre_num_isbn
+unique(num_isbn);
+
+alter table pret 
+add constraint CK_pret_date
+check(dateretour>=datepret);
+
+
+ #### remplir la base de donnees
+
+load data local infile'C:/Users/viet/Documents/livre.csv' into table livre fields terminated by ';';
+load data local infile'C:/Users/viet/Documents/possede.csv' into table possede fields terminated by ';';
+load data local infile'C:/Users/viet/Documents/cours.csv' into table cours fields terminated by ';';
+load data local infile'C:/Users/viet/Documents/classes.csv' into table class fields terminated by ';';
+load data local infile'C:/Users/viet/Documents/resultat.csv' into table resultat fields terminated by ';';
+
+load data local infile'C:/Users/viet/Desktop/Book123.csv' into table etudiant fields terminated by ';';
+load data local infile'C:/Users/viet/Documents/inscrit.csv' into table inscrit fields terminated by ';';
+load data local infile'C:/Users/viet/Documents/auteur.csv' into table auteur fields terminated by ';';
+
+
+
+
+
+    ##### autre tableaux 
+
+
+    ///////
+
+create table table2(num_cours int ,Classe varchar(50),MIN varchar(50),MAX varchar(50),foreign key(num_cours) references cours(num_cours));
+
+
+insert into table2 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=18 and cours.num_cours=7;
+
+
+insert into table2 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=18 and cours.num_cours=8;
+
+
+insert into table2 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=18 and cours.num_cours=9;
+
+
+insert into table2 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=18 and cours.num_cours=10;
+
+
+insert into table2 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=18 and cours.num_cours=11;
+
+insert into table2 (num_cours,Classe,MIN,MAX)
+select cours.num_cours ,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=18 and cours.num_cours=12;
+
+   /////
+
+create table table1(num_cours int ,Classe varchar(50),MIN varchar(50),MAX varchar(50),foreign key(num_cours) references cours(num_cours));
+
+
+insert into table1 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=8 and cours.num_cours=1;
+
+
+insert into table1 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=8 and cours.num_cours=2;
+
+
+insert into table1 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=8 and cours.num_cours=3;
+
+
+insert into table1 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=8 and cours.num_cours=4;
+
+
+insert into table1 (num_cours,Classe,MIN,MAX)
+select cours.num_cours,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=8 and cours.num_cours=5;
+
+
+insert into table1 (num_cours,Classe,MIN,MAX)
+select cours.num_cours ,avg(resultat.note),min(resultat.note),max(resultat.note)
+from cours,resultat,etudiant
+where cours.num_cours=resultat.num_cours and etudiant.num_etu=resultat.num_etu and etudiant.numclass=8 and cours.num_cours=6;
+
+      //////
+
+create table resultatfinal (NOM varchar(100),Prenom varchar(50),Module varchar(50),Note varchar(50),Classe varchar(50),MAX varchar(50),MIN varchar(50));
+   
+
+create table echec( nom varchar(100),prenom varchar(50),Classe varchar(50),Module varchar(100));
+
+create table table5(NOM varchar(100) );
+
+create table moyenne(Nom varchar(50),prenom varchar(50),Note double);
+
