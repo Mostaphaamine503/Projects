@@ -1,0 +1,221 @@
+/////Q1
+
+#la fonction qui returne la data d'inscription d'un etudiant
+
+import mysql.connector
+
+
+def insBU(nomE) :
+    config = {'user': 'root','host': 'localhost','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    cursor.execute('SELECT dateinscripbu FROM etudiant WHERE nom LIKE \'%' + nomE + '%\'' );
+    for dateinscripbu in cursor :
+        return dateinscripbu
+    cnx.close()
+
+b=input('entrer un nom : \n')
+print(insBU(b))
+
+
+/////Q2
+
+#la fonction returne les noms et les prenoms des etudiant inscrit dans le cours n* n_cours
+
+import mysql.connector
+
+def insCour(n_cours): 
+    L=[]
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    cursor.execute( 'select etudiant.nom,etudiant.prenom from etudiant,inscrit,cours where etudiant.num_etu=inscrit.num_etu and inscrit.num_cours=cours.num_cours and cours.num_cours LIKE \'%' + n_cours + '%\' ; ');
+    for row in cursor :
+        L.append(str(row[0:2]))
+    return(L)
+    #cnx.close() 
+n_cours=input('entre le numero') 
+print(insCour(n_cours)) 
+
+
+///////Q3
+
+#la fonction return le resultat final et le moyenne generale de l'etudiant 
+
+import mysql.connector
+import numpy as np 
+
+def resufinal(num_etu):
+    m=[]
+    n=np.array([])
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor(buffered=True)     
+    if int(num_etu) >= 6525 :
+        cursor.execute('insert into resultatfinal(NOM,Prenom,Module,Note,Classe,MAX,MIN) select etudiant.nom,etudiant.prenom,cours.nomC,resultat.note,table2.Classe,table2.MAX,table2.MIN from etudiant,cours,resultat,table2,class where etudiant.num_etu=resultat.num_etu and cours.num_cours=resultat.num_cours and class.numclass=18 and cours.num_cours=table2.num_cours and etudiant.num_etu LIKE \'%' + num_etu + '%\';')
+        cursor.execute('select * from resultatfinal;')
+        data = list(cursor.fetchall())
+        for c in data :
+            m.append(c[0:7])
+        n=np.asarray(m)
+        print(n)
+        for row in cursor :
+            res=list(row)
+            print("le moyenne generale est ",res[0])
+        cursor.execute('delete from resultatfinal;')
+        return
+    #cnx.close()
+    if int(num_etu) < 6525:
+       cursor.execute('insert into resultatfinal(NOM,Prenom,Module,Note,Classe,MAX,MIN) select etudiant.nom,etudiant.prenom,cours.nomC,resultat.note,table1.Classe,table1.MAX,table1.MIN from etudiant,cours,resultat,table1,class where etudiant.num_etu=resultat.num_etu and cours.num_cours=resultat.num_cours and class.numclass=8 and cours.num_cours=table1.num_cours and etudiant.num_etu LIKE \'%' + num_etu + '%\';')
+       cursor.execute('select * from resultatfinal;')
+       data1 = list(cursor.fetchall())
+       for c in data1:
+           m.append(c[0:7])
+       n=np.asarray(m)
+       print(n)
+       cursor.execute('select sum(Note)/6 from resultatfinal;')
+       for row in cursor :
+           res=list(row)
+           print("le moyenne generale est ",res[0])
+       cursor.execute('delete from resultatfinal;')
+       return
+    #cnx.close()
+print(resufinal('6502'))
+
+
+////Q4
+
+#la fonction returne les noms et les prenoms des etudiant qui ont echec avec le moyenne de class et le nom de module
+
+import mysql.connector
+def ResuEchec() :
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    cursor.execute('insert into echec(nom,prenom,Classe,Module) select etudiant.nom,etudiant.prenom,table1.Classe,cours.nomC from etudiant,table1,cours,class,resultat where etudiant.num_etu=resultat.num_etu and cours.num_cours=resultat.num_cours and class.numclass=8 and resultat.note<10 and cours.num_cours=table1.num_cours;')
+    cursor.execute('insert into echec(nom,prenom,Classe,Module) select etudiant.nom,etudiant.prenom,table2.Classe,cours.nomC from etudiant,table2,cours,class,resultat where etudiant.num_etu=resultat.num_etu and cours.num_cours=resultat.num_cours and class.numclass=18 and resultat.note<10 and cours.num_cours=table2.num_cours;')
+    cursor.execute('select * from echec group by Module;')
+    for row in cursor:
+        print(row)
+
+print(ResuEchec())
+
+///////Q5
+
+#la fonctio returne les nom des etudiant qui ont inscrit dans tout les cours
+
+import mysql.connector
+def insr() :
+    l=[]
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    cursor.execute('insert into table5(NOM) select distinct(etudiant.nom) from etudiant,inscrit where etudiant.num_etu=inscrit.num_etu;')
+    cursor.execute('select * from table5;')
+    for NOM in cursor:
+        l.append(NOM)
+    return(l)
+    cnx.close()
+print(insr())
+
+///////Q6
+
+#la fonction returne les noms des étudiants  avec date retour de livre
+
+import mysql.connector
+def Empliv(Nlivre) :
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    cursor.execute('select etudiant.nom,pret.dateretourprevue from etudiant,pret,livre where etudiant.num_etu=pret.num_etu and pret.Nlivre=livre.Nlivre and livre.Nlivre LIKE \'%' + Nlivre + '%\';')
+    for row in cursor :
+        print(row)
+    cnx.close()
+print(Empliv("2"))  
+
+
+/////////Q7
+
+#la fonction returne les noms des étudiants  n’ayant pas encore rendus au moins un livre 
+
+import mysql.connector
+def retard() :
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    cursor.execute('select etudiant.nom from etudiant ,pret, livre,possede where possede.Nlivre !=pret.Nlivre;')
+    for nom in cursor :
+        print(nom)
+    cnx.close()
+print(retard())
+
+////////Q8
+#
+
+import mysql.connector
+def noEmp() :
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    cursor.execute('select etudiant.nom ,livre.titre from etudiant,livre ,pret where etudiant.num_etu=pret.num_etu and pret.Nlivre=livre.Nlivre;')
+    for row in cursor :
+        print(row)
+    cnx.close()
+
+print(noEmp())
+
+///////Q9
+
+#la fonction returne les noms des livres empruntés par personne
+
+import mysql.connector
+def ResultTot() :
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    cursor.execute('select nomclass from class where numclass=8;');
+    res=cursor.fetchall()
+    print(res)
+    cursor.execute('select cours.nomC,table1.Classe from cours,table1 where table1.num_cours=cours.num_cours;')
+    for row in cursor :
+        print(row)
+    cursor.execute('select nomclass from class where numclass=18;')
+    res=cursor.fetchall()
+    print(res)
+    cursor.execute('select cours.nomC,table2.Classe from cours,table2 where table2.num_cours=cours.num_cours;')
+    for row in cursor :
+        print(row)
+print(ResultTot())
+
+
+///////Q10
+
+#la fonction change le nom de cours numero num_cours
+
+import mysql.connector
+def nomcours(num_cours) :
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    res=input('entrer le nouvelle nom :/n')
+    cursor.execute('update cours')
+    cursor.execute('set nomC like \'%' + res + '%\' where num_cours like \'%' + num_cours + '%\';')
+    print('le nom est changer')
+    cnx.close()
+b=input('entrer le numero du cours')
+print(nomcours(str(b)))
+
+////////Q11
+
+#la fonction suppremer le cours numero num_cours
+
+import mysql.connector
+def suppcours(num_cours) :
+    config = {'user': 'root','host': '127.0.0.1','database': 'students'}
+    cnx = mysql.connector.connect(**config)
+    cursor = cnx.cursor()
+    cursor.execute('delete from cours where num_cours like \'%' + num_cours + '\%'';')
+    cnx.close()
+res=str(input('entrer le numero du cours'))
+print(suppcours(res))
+
